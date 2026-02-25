@@ -99,14 +99,14 @@ class Plugin(CW2Plugin):
         super().on_load()
         
         # 1. Launcher 便携化路径
-        # 文件夹已被 Move-Item 移入 net.bloret.launcher/launcher
         launcher_exe = os.path.join(str(self.PATH), "launcher", "Bloret-Launcher.exe")
         self.launcher_backend = LauncherBackend(launcher_exe)
         
-        # 注册启动器小组件
+        # 注册启动器小组件 - 使用中文名称便于识别
         self.api.widgets.register(
             widget_id="net.bloret.launcher.widget",
-            name="Bloret Launcher",
+            name="Bloret 启动器",
+            description="一键打开 Bloret Launcher",
             qml_path=os.path.join(str(self.PATH), "qml", "Launcher.qml"),
             backend_obj=self.launcher_backend
         )
@@ -115,7 +115,8 @@ class Plugin(CW2Plugin):
         self.status_backend = ServerStatusBackend()
         self.api.widgets.register(
             widget_id="net.bloret.server.status",
-            name="Bloret Server Status",
+            name="Bloret 服务器状态",
+            description="实时显示 Bloret 服务器在线人数和状态",
             qml_path=os.path.join(str(self.PATH), "qml", "ServerStatus.qml"),
             backend_obj=self.status_backend
         )

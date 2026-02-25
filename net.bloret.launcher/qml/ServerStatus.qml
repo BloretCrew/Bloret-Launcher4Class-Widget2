@@ -1,76 +1,119 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Effects
 
 Item {
     id: root
-    width: 240
-    height: 120
+    width: 260
+    height: 140
 
+    // 背景卡片
     Rectangle {
+        id: card
         anchors.fill: parent
-        radius: 16
-        color: "#f5f5f5"
-        border.color: "#e0e0e0"
-        border.width: 1
+        radius: 20
+        color: "#FFFFFF"
         
+        // 阴影效果 (如果是 Class Widgets 环境可能已有阴影，这里加个轻微的边框)
+        border.color: "#F0F0F0"
+        border.width: 1
+
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 12
-            spacing: 4
+            anchors.margins: 16
+            spacing: 8
 
+            // 头部：标题与灯
             RowLayout {
                 Layout.fillWidth: true
-                
+                spacing: 12
+
                 Image {
-                    source: "../assets/bloret.png"
-                    Layout.preferredWidth: 24
-                    Layout.preferredHeight: 24
+                    source: "../icon.png"
+                    Layout.preferredWidth: 32
+                    Layout.preferredHeight: 32
+                    smooth: true
+                    fillMode: Image.PreserveAspectFit
                 }
-                
-                Text {
-                    text: "Bloret 服务器状态"
-                    font.pixelSize: 16
-                    font.bold: true
+
+                ColumnLayout {
+                    spacing: 0
                     Layout.fillWidth: true
-                }
-                
-                Rectangle {
-                    width: 12
-                    height: 12
-                    radius: 6
-                    color: (typeof backend !== "undefined" && backend.online) ? "#4caf50" : "#f44336"
+                    
+                    Text {
+                        text: "Bloret 百络谷"
+                        font.pixelSize: 15
+                        font.weight: Font.DemiBold
+                        color: "#1D1D1F"
+                    }
+                    
+                    Text {
+                        text: (typeof backend !== "undefined" && backend.online) ? "● 运行中" : "○ 已离线"
+                        font.pixelSize: 11
+                        color: (typeof backend !== "undefined" && backend.online) ? "#34C759" : "#FF3B30"
+                    }
                 }
             }
 
+            // MOTD
             Text {
-                text: (typeof backend !== "undefined" && backend.online) ? "在线" : "离线"
-                color: (typeof backend !== "undefined" && backend.online) ? "#4caf50" : "#f44336"
-                font.pixelSize: 12
-            }
-
-            Text {
-                text: (typeof backend !== "undefined") ? backend.motd : "正在加载..."
+                id: motdText
+                Layout.fillWidth: true
+                text: (typeof backend !== "undefined") ? backend.motd : "获取中..."
                 font.pixelSize: 13
-                color: "#666666"
-                Layout.fillWidth: true
+                color: "#48484A"
                 elide: Text.ElideRight
-                wrapMode: Text.WordWrap
                 maximumLineCount: 2
+                wrapMode: Text.WordWrap
+                verticalAlignment: Text.AlignVCenter
             }
 
-            RowLayout {
+            // 进度条与人数
+            ColumnLayout {
                 Layout.fillWidth: true
-                
-                ProgressBar {
-                    value: (typeof backend !== "undefined" && backend.playersMax > 0) ? backend.playersOnline / backend.playersMax : 0
+                spacing: 4
+
+                RowLayout {
                     Layout.fillWidth: true
+                    Text {
+                        text: "在线人数"
+                        font.pixelSize: 11
+                        color: "#8E8E93"
+                    }
+                    Item { Layout.fillWidth: true }
+                    Text {
+                        text: (typeof backend !== "undefined") ? (backend.playersOnline + " / " + backend.playersMax) : "0 / 0"
+                        font.pixelSize: 11
+                        font.weight: Font.Medium
+                        color: "#1D1D1F"
+                    }
                 }
-                
-                Text {
-                    text: (typeof backend !== "undefined") ? backend.playersOnline + "/" + backend.playersMax : "0/0"
-                    font.pixelSize: 12
-                    color: "#999999"
+
+                ProgressBar {
+                    id: playerBar
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 6
+                    value: (typeof backend !== "undefined" && backend.playersMax > 0) ? backend.playersOnline / backend.playersMax : 0
+                    
+                    background: Rectangle {
+                        implicitWidth: 200
+                        implicitHeight: 6
+                        color: "#E5E5EA"
+                        radius: 3
+                    }
+
+                    contentItem: Item {
+                        implicitWidth: 200
+                        implicitHeight: 6
+
+                        Rectangle {
+                            width: playerBar.visualPosition * parent.width
+                            height: parent.height
+                            radius: 3
+                            color: "#5856D6" // 蓝色/紫色调
+                        }
+                    }
                 }
             }
         }
