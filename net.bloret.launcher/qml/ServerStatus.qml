@@ -1,27 +1,23 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Widgets
+import RinUI
 
-Item {
+Widget {
     id: root
-    width: 240
-    height: 100
-
-    // 背景卡片：匹配默认淡色主题
-    Rectangle {
-        id: card
-        anchors.fill: parent
-        radius: 16
-        color: "#E5FFFFFF" // 几乎不透明的白色，配合主程序的毛玻璃
-        border.color: "#15000000"
-        border.width: 1
-    }
+    width: 250
+    height: 110
+    
+    // 设置 Widget 标题风格
+    text: "Bloret 服务器状态"
 
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 12
         spacing: 4
 
+        // 顶栏：图标和在线状态
         RowLayout {
             Layout.fillWidth: true
             spacing: 8
@@ -37,37 +33,26 @@ Item {
                 spacing: -2
                 Layout.fillWidth: true
                 
-                Text {
-                    text: "Bloret 百络谷"
+                Title {
+                    text: "百络谷 (Bloret)"
                     font.pixelSize: 13
-                    font.bold: true
-                    color: "#1D1D1F"
+                    Layout.fillWidth: true
                 }
                 
-                // 更加醒目的状态文字
                 Text {
-                    id: statusLabel
-                    text: {
-                        var b = (typeof backend !== "undefined") ? backend : null;
-                        if (!b) return "○ 组件加载中...";
-                        return b.online ? "● 服务器在线" : "● 服务器离线";
-                    }
+                    text: (typeof backend !== "undefined" && backend.online) ? "● 服务器在线" : "○ 服务器离线"
                     font.pixelSize: 10
                     font.weight: Font.DemiBold
-                    color: {
-                        var b = (typeof backend !== "undefined") ? backend : null;
-                        if (!b) return "#8E8E93";
-                        return b.online ? "#28CD41" : "#FF3B30";
-                    }
+                    color: (typeof backend !== "undefined" && backend.online) ? "#28CD41" : "#FF3B30"
                 }
             }
         }
 
-        // MOTD：自动滚动或限制
+        // 公告信息
         Text {
-            text: (typeof backend !== "undefined") ? backend.motd : "正在从服务器获取最新公告..."
+            text: (typeof backend !== "undefined") ? backend.motd : "同步中..."
             font.pixelSize: 11
-            color: "#48484A"
+            color: Qt.rgba(0, 0, 0, 0.6) // 适配淡色主题的深度灰
             Layout.fillWidth: true
             elide: Text.ElideRight
             maximumLineCount: 1
@@ -75,51 +60,32 @@ Item {
 
         Item { Layout.fillHeight: true }
 
-        // 人数进度条
+        // 人数显示与进度
         RowLayout {
             Layout.fillWidth: true
-            spacing: 8
+            spacing: 10
             
-            ProgressBar {
-                id: playerBar
+            // 使用标准的进度条渲染方式，配合官方样式
+            Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 5
-                value: (typeof backend !== "undefined" && backend.playersMax > 0) ? backend.playersOnline / backend.playersMax : 0
+                color: Qt.rgba(0, 0, 0, 0.05)
+                radius: 2.5
                 
-                background: Rectangle {
-                    implicitHeight: 5
-                    color: "#F2F2F7"
+                Rectangle {
+                    width: (typeof backend !== "undefined" && backend.playersMax > 0) ? 
+                           parent.width * (backend.playersOnline / backend.playersMax) : 0
+                    height: parent.height
                     radius: 2.5
-                }
-
-                contentItem: Item {
-                    Rectangle {
-                        width: playerBar.visualPosition * parent.width
-                        height: parent.height
-                        radius: 2.5
-                        color: "#007AFF" // 标准 iOS 蓝色
-                    }
+                    color: "#007AFF"
+                    
+                    Behavior on width { NumberAnimation { duration: 500 } }
                 }
             }
             
-            Text {
+            Title {
                 text: (typeof backend !== "undefined") ? (backend.playersOnline + "/" + backend.playersMax) : "--/--"
-                font.pixelSize: 10
-                font.weight: Font.Bold
-                color: "#1D1D1F"
-            }
-        }
-    }
-    
-    // 定时刷新尝试 (如果 Signal 没收到)
-    Timer {
-        interval: 2000
-        running: true
-        repeat: true
-        onTriggered: {
-            // 简单的强制重绘属性（如果定义了）
-            if (typeof backend !== "undefined") {
-                // statusLabel.text = backend.online ? "● 在线" : "○ 离线";
+                font.pixelSize: 11
             }
         }
     }
