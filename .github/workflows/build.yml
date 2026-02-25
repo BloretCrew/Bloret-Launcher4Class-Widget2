@@ -27,7 +27,7 @@ jobs:
           pip install ./class-widgets-sdk-master
 
       - name: Create dist directory
-        run: mkdir dist
+        run: mkdir -p dist
 
       - name: Package Plugin
         run: |
