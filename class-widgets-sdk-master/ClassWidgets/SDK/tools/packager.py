@@ -20,7 +20,10 @@ def tr(en: str, cn: str) -> str:
 
 def print_step(msg: str):
     """Prints a step with a styled bullet point."""
-    click.echo(click.style("  ➜ ", fg="green", bold=True) + msg)
+    try:
+        click.echo(click.style("  -> ", fg="green", bold=True) + msg)
+    except UnicodeEncodeError:
+        click.echo("  -> " + msg)
 
 def print_info(key: str, value: str):
     """Prints a key-value pair nicely."""
