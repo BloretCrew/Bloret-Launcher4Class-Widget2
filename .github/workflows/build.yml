@@ -1,6 +1,9 @@
 name: Build and Release CW Plugin
 
 on:
+  push:
+    branches:
+      - '**'
   release:
     types: [published, prereleased]
   workflow_dispatch:
