@@ -1,0 +1,48 @@
+name: Build and Release CW Plugin
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install SDK
+        run: |
+          pip install ./class-widgets-sdk-master
+
+      - name: Create dist directory
+        run: mkdir dist
+
+      - name: Package Plugin
+        run: |
+          # Use the SDK tool to package the plugin
+          cw-plugin-pack ./com.bloret.launcher -o ./dist/com.bloret.launcher.cwplugin
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: dist/com.bloret.launcher.cwplugin
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: com.bloret.launcher.cwplugin
+          path: dist/com.bloret.launcher.cwplugin

@@ -1,0 +1,14 @@
+[project]
+name = "com-bloret-launcher"
+version = "1.0.0"
+description = "0.1.0"
+authors = [
+    {name = "Bloret"},
+]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
