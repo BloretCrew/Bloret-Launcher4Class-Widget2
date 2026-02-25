@@ -1,9 +1,8 @@
 import os
 import subprocess
-from ClassWidgets.SDK import CW2Plugin, PluginAPI, QObject
+from ClassWidgets.SDK import CW2Plugin, PluginAPI
 
-
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Slot, QObject
 
 class LauncherBackend(QObject):
     def __init__(self, launcher_path):
