@@ -4,20 +4,20 @@ import QtQuick.Layouts
 
 Item {
     id: root
-    width: 100
-    height: 100
+    width: 80
+    height: 90
 
     Button {
         id: launchButton
         anchors.fill: parent
         flat: true
-        padding: 0
         
         background: Rectangle {
-            id: bg
-            radius: 20
-            color: launchButton.hovered ? "#0A000000" : "transparent"
-            Behavior on color { ColorAnimation { duration: 200 } }
+            radius: 12
+            color: launchButton.hovered ? "#2FFFFFFF" : "#1FFFFFFF"
+            border.color: "#3FFFFFFF"
+            border.width: 1
+            Behavior on color { ColorAnimation { duration: 150 } }
         }
 
         contentItem: ColumnLayout {
@@ -25,24 +25,22 @@ Item {
             spacing: 4
             
             Image {
-                id: iconImg
                 source: "../icon.png"
-                Layout.preferredWidth: 56
-                Layout.preferredHeight: 56
+                Layout.preferredWidth: 48
+                Layout.preferredHeight: 48
                 Layout.alignment: Qt.AlignHCenter
                 smooth: true
-                fillMode: Image.PreserveAspectFit
-                
-                scale: launchButton.pressed ? 0.92 : 1.0
-                Behavior on scale { NumberAnimation { duration: 80 } }
+                opacity: launchButton.pressed ? 0.8 : 1.0
             }
             
             Text {
                 text: "启动器"
-                font.pixelSize: 12
-                font.weight: Font.Medium
-                color: "#1D1D1F"
+                font.pixelSize: 11
+                font.bold: true
+                color: "white"
                 Layout.alignment: Qt.AlignHCenter
+                style: Text.Outline
+                styleColor: "#20000000"
             }
         }
 
