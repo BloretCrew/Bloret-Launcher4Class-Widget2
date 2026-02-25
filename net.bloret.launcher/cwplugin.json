@@ -1,12 +1,12 @@
 {
-  "id": "com.bloret.launcher",
+  "id": "net.bloret.launcher",
   "name": "Bloret Launcher",
   "version": "0.1.0",
-  "api_version": ">=0.4.1",
+  "api_version": ">=0.3.0",
   "entry": "main.py",
   "author": "Bloret",
   "description": "Open Bloret Launcher from Class Widgets.",
-  "url": "https://github.com/BloretCrew/Bloret-Launcher4Class-Widget2",
+  "url": "https://launcher.bloret.net/",
   "readme": "README.md",
   "icon": "icon.png"
 }

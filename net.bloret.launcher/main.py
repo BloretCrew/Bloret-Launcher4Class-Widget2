@@ -36,7 +36,7 @@ class Plugin(CW2Plugin):
         
         # 注册小组件
         self.api.widgets.register(
-            widget_id="com.bloret.launcher.widget",
+            widget_id="net.bloret.launcher.widget",
             name="Bloret Launcher",
             qml_path=os.path.join(self.PATH, "qml/Launcher.qml"),
             backend_obj=self.backend
