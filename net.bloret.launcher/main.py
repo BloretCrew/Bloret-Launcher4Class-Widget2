@@ -38,15 +38,15 @@ class LauncherBackend(QObject):
 
     @Slot()
     def launch(self):
-        log_message(f"Attempting to launch: {self.launcher_path}")
+        log_message(f"LAUNCH CLICKED: {self.launcher_path}")
         if os.path.exists(self.launcher_path):
             try:
                 subprocess.Popen([self.launcher_path], cwd=os.path.dirname(self.launcher_path))
-                log_message("Launch command executed successfully.")
+                log_message("Process started successfully.")
             except Exception as e:
-                log_message(f"Launch failed with error: {e}")
+                log_message(f"Process start error: {e}")
         else:
-            log_message(f"Launcher executable not found at: {self.launcher_path}")
+            log_message(f"File not found: {self.launcher_path}")
 
 
 class ServerStatusBackend(QObject):
@@ -57,16 +57,17 @@ class ServerStatusBackend(QObject):
         self._online = False
         self._players_online = 0
         self._players_max = 0
-        self._motd = "正在获取状态..."
+        self._motd = "初始化中..."
         self._ip = ""
         
         self._running = True
         self._thread = threading.Thread(target=self._refresh_loop, daemon=True)
         self._thread.start()
-        log_message("ServerStatusBackend initialized and thread started.")
 
     @Property(bool, notify=status_changed)
-    def online(self): return self._online
+    def online(self): 
+        # log_message(f"QML read online: {self._online}")
+        return self._online
 
     @Property(int, notify=status_changed)
     def playersOnline(self): return self._players_online
@@ -78,52 +79,40 @@ class ServerStatusBackend(QObject):
     def motd(self): return self._motd
 
     def _get_json(self, url):
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
+        headers = { 'User-Agent': 'Mozilla/5.0' }
         try:
             req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, timeout=10) as response:
-                content = response.read().decode('utf-8')
-                return json.loads(content)
+            with urllib.request.urlopen(req, timeout=8) as response:
+                return json.loads(response.read().decode('utf-8'))
         except Exception as e:
-            log_message(f"API Fetch error for {url}: {e}")
+            log_message(f"Fetch ERROR {url}: {e}")
             return None
 
     def _refresh_loop(self):
         while self._running:
             try:
-                # 1. 获取 IP
-                log_message("Requesting dynamic IP from GitCode...")
                 ip_data = self._get_json("https://raw.gitcode.com/Bloret/Bloret-Launcher/raw/Windows/IP.json")
                 if ip_data:
                     self._ip = ip_data.get("PCFS", "")
-                    log_message(f"Successfully obtained IP: {self._ip}")
-                else:
-                    log_message("Failed to obtain dynamic IP.")
                 
-                # 2. 获取服务器状态
                 if self._ip:
                     url = f"http://{self._ip}:20901/api/getserver?name=Bloret"
-                    log_message(f"Requesting server status from {url}...")
                     server_data = self._get_json(url)
                     if server_data and "realTimeStatus" in server_data:
                         status = server_data["realTimeStatus"]
                         self._online = status.get("online", False)
                         self._players_online = status.get("playersOnline", 0)
                         self._players_max = status.get("playersMax", 0)
-                        motd_list = status.get("motdClean", ["未知状态"])
+                        motd_list = status.get("motdClean", ["无公告"])
                         self._motd = " ".join(motd_list)
-                        log_message(f"Status update: Online={self._online}, Players={self._players_online}/{self._players_max}")
+                        log_message(f"SYNC OK: {self._online}, {self._players_online}/{self._players_max}")
                     else:
                         self._online = False
-                        self._motd = "查询失败或服务器离线"
-                        log_message(f"Server data response was invalid or empty for {url}")
+                        self._motd = "无法获取服务器信息"
                 
                 self.status_changed.emit()
             except Exception as e:
-                log_message(f"Error in refresh loop: {e}")
-            
+                log_message(f"Loop ERROR: {e}")
             time.sleep(60)
 
     def stop(self):
@@ -133,30 +122,35 @@ class ServerStatusBackend(QObject):
 class Plugin(CW2Plugin):
     def on_load(self):
         super().on_load()
-        log_message("Plugin.on_load() called.")
+        log_message("Plugin Loading...")
         
+        # 路径准备
         launcher_exe = os.path.join(str(self.PATH), "launcher", "Bloret-Launcher.exe")
         self.launcher_backend = LauncherBackend(launcher_exe)
+        self.status_backend = ServerStatusBackend()
         
+        # 使用位置参数注册，确保 backend_obj 能够被正确识别
+        # register(widget_id, name, qml_path, backend_obj=None, ...)
+        
+        # 1. Launcher
         self.api.widgets.register(
-            widget_id="net.bloret.launcher.widget",
-            name="Bloret 启动器",
-            qml_path=os.path.join(str(self.PATH), "qml", "Launcher.qml"),
-            backend_obj=self.launcher_backend
+            "net.bloret.launcher.widget",
+            "Bloret 启动器",
+            os.path.join(str(self.PATH), "qml", "Launcher.qml"),
+            self.launcher_backend
         )
 
-        self.status_backend = ServerStatusBackend()
+        # 2. Server Status
         self.api.widgets.register(
-            widget_id="net.bloret.server.status",
-            name="Bloret 服务器状态",
-            qml_path=os.path.join(str(self.PATH), "qml", "ServerStatus.qml"),
-            backend_obj=self.status_backend
+            "net.bloret.server.status",
+            "Bloret 服务器状态",
+            os.path.join(str(self.PATH), "qml", "ServerStatus.qml"),
+            self.status_backend
         )
         
-        log_message("All widgets registered.")
+        log_message("Plugin Loaded and Widgets Registered.")
 
     def on_unload(self):
-        log_message("Plugin.on_unload() called.")
         if hasattr(self, 'status_backend'):
             self.status_backend.stop()
-        print(f"Bloret Launcher unloaded")
+        log_message("Plugin Unloaded.")

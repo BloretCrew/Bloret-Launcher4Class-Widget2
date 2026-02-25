@@ -4,36 +4,32 @@ import QtQuick.Layouts
 
 Item {
     id: root
-    width: 250
-    height: 120
+    width: 240
+    height: 100
 
-    // 毛玻璃风格背景
+    // 背景卡片：匹配默认淡色主题
     Rectangle {
         id: card
         anchors.fill: parent
-        radius: 12
-        // 使用带有透明度的浅色背景模拟 Glassmorphism
-        color: "#1FFFFFFF" 
-        border.color: "#3FFFFFFF"
+        radius: 16
+        color: "#E5FFFFFF" // 几乎不透明的白色，配合主程序的毛玻璃
+        border.color: "#15000000"
         border.width: 1
-        
-        // 实际上 Class Widgets 已经处理了模糊背景，我们只需要确保背景是透明的
-        // 如果是在纯 QML 环境下，需要用 FastBlur，但这里我们跟随主程序风格
     }
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 14
-        spacing: 6
+        anchors.margins: 12
+        spacing: 4
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 10
+            spacing: 8
 
             Image {
                 source: "../icon.png"
-                Layout.preferredWidth: 28
-                Layout.preferredHeight: 28
+                Layout.preferredWidth: 24
+                Layout.preferredHeight: 24
                 smooth: true
             }
 
@@ -43,68 +39,87 @@ Item {
                 
                 Text {
                     text: "Bloret 百络谷"
-                    font.pixelSize: 14
+                    font.pixelSize: 13
                     font.bold: true
-                    color: "white"
-                    style: Text.Outline
-                    styleColor: "#20000000"
+                    color: "#1D1D1F"
                 }
                 
+                // 更加醒目的状态文字
                 Text {
-                    text: (typeof backend !== "undefined" && backend.online) ? "● 服务器在线" : "○ 服务器离线"
+                    id: statusLabel
+                    text: {
+                        var b = (typeof backend !== "undefined") ? backend : null;
+                        if (!b) return "○ 组件加载中...";
+                        return b.online ? "● 服务器在线" : "● 服务器离线";
+                    }
                     font.pixelSize: 10
-                    font.weight: Font.Medium
-                    color: (typeof backend !== "undefined" && backend.online) ? "#a0ffb0" : "#ffb0b0"
+                    font.weight: Font.DemiBold
+                    color: {
+                        var b = (typeof backend !== "undefined") ? backend : null;
+                        if (!b) return "#8E8E93";
+                        return b.online ? "#28CD41" : "#FF3B30";
+                    }
                 }
             }
         }
 
+        // MOTD：自动滚动或限制
         Text {
-            text: (typeof backend !== "undefined") ? backend.motd : "正在连接..."
-            font.pixelSize: 12
-            color: "#eeeeee"
+            text: (typeof backend !== "undefined") ? backend.motd : "正在从服务器获取最新公告..."
+            font.pixelSize: 11
+            color: "#48484A"
             Layout.fillWidth: true
             elide: Text.ElideRight
-            maximumLineCount: 2
-            wrapMode: Text.WordWrap
+            maximumLineCount: 1
         }
 
         Item { Layout.fillHeight: true }
 
+        // 人数进度条
         RowLayout {
             Layout.fillWidth: true
+            spacing: 8
             
             ProgressBar {
-                id: control
+                id: playerBar
                 Layout.fillWidth: true
-                Layout.preferredHeight: 4
+                Layout.preferredHeight: 5
                 value: (typeof backend !== "undefined" && backend.playersMax > 0) ? backend.playersOnline / backend.playersMax : 0
                 
                 background: Rectangle {
-                    implicitWidth: 200
-                    implicitHeight: 4
-                    color: "#30ffffff"
-                    radius: 2
+                    implicitHeight: 5
+                    color: "#F2F2F7"
+                    radius: 2.5
                 }
 
                 contentItem: Item {
-                    implicitWidth: 200
-                    implicitHeight: 4
-
                     Rectangle {
-                        width: control.visualPosition * parent.width
+                        width: playerBar.visualPosition * parent.width
                         height: parent.height
-                        radius: 2
-                        color: "#ffffff"
+                        radius: 2.5
+                        color: "#007AFF" // 标准 iOS 蓝色
                     }
                 }
             }
             
             Text {
-                text: (typeof backend !== "undefined") ? (backend.playersOnline + "/" + backend.playersMax) : "0/0"
-                font.pixelSize: 11
-                color: "#dddddd"
-                font.family: "Monospace"
+                text: (typeof backend !== "undefined") ? (backend.playersOnline + "/" + backend.playersMax) : "--/--"
+                font.pixelSize: 10
+                font.weight: Font.Bold
+                color: "#1D1D1F"
+            }
+        }
+    }
+    
+    // 定时刷新尝试 (如果 Signal 没收到)
+    Timer {
+        interval: 2000
+        running: true
+        repeat: true
+        onTriggered: {
+            // 简单的强制重绘属性（如果定义了）
+            if (typeof backend !== "undefined") {
+                // statusLabel.text = backend.online ? "● 在线" : "○ 离线";
             }
         }
     }
