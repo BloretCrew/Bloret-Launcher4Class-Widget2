@@ -6,87 +6,78 @@ import RinUI
 
 Widget {
     id: root
-    width: 250
-    height: 110
+    width: 180
+    height: 100
     
-    // 设置 Widget 标题风格
-    text: "Bloret 服务器状态"
+    // 顶部小字标题
+    text: "在线人数"
 
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 12
-        spacing: 4
+        spacing: 0
 
-        // 顶栏：图标和在线状态
-        RowLayout {
+        // 中间大数字显示
+        Item {
             Layout.fillWidth: true
-            spacing: 8
-
-            Image {
-                source: "../icon.png"
-                Layout.preferredWidth: 24
-                Layout.preferredHeight: 24
-                smooth: true
-            }
-
-            ColumnLayout {
-                spacing: -2
-                Layout.fillWidth: true
+            Layout.fillHeight: true
+            
+            Row {
+                anchors.centerIn: parent
+                spacing: 4
                 
-                Title {
-                    text: "百络谷 (Bloret)"
-                    font.pixelSize: 13
-                    Layout.fillWidth: true
-                }
-                
+                // 大数字
                 Text {
-                    text: (typeof backend !== "undefined" && backend.online) ? "● 服务器在线" : "○ 服务器离线"
-                    font.pixelSize: 10
-                    font.weight: Font.DemiBold
-                    color: (typeof backend !== "undefined" && backend.online) ? "#28CD41" : "#FF3B30"
+                    text: (typeof backend !== "undefined") ? backend.playersOnline : "0"
+                    font.pixelSize: 32
+                    font.weight: Font.Bold
+                    color: "#1D1D1F"
+                    font.family: "MiSans, HarmonyOS Sans, Segoe UI"
                 }
-            }
-        }
-
-        // 公告信息
-        Text {
-            text: (typeof backend !== "undefined") ? backend.motd : "同步中..."
-            font.pixelSize: 11
-            color: Qt.rgba(0, 0, 0, 0.6) // 适配淡色主题的深度灰
-            Layout.fillWidth: true
-            elide: Text.ElideRight
-            maximumLineCount: 1
-        }
-
-        Item { Layout.fillHeight: true }
-
-        // 人数显示与进度
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 10
-            
-            // 使用标准的进度条渲染方式，配合官方样式
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 5
-                color: Qt.rgba(0, 0, 0, 0.05)
-                radius: 2.5
                 
-                Rectangle {
-                    width: (typeof backend !== "undefined" && backend.playersMax > 0) ? 
-                           parent.width * (backend.playersOnline / backend.playersMax) : 0
-                    height: parent.height
-                    radius: 2.5
-                    color: "#007AFF"
-                    
-                    Behavior on width { NumberAnimation { duration: 500 } }
+                // 分隔符与最大人数
+                Text {
+                    text: (typeof backend !== "undefined") ? "/ " + backend.playersMax : "/ 0"
+                    font.pixelSize: 14
+                    font.weight: Font.Medium
+                    color: "#8E8E93"
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 6
                 }
             }
+        }
+
+        // 底部进度条 (仿图二风格)
+        Rectangle {
+            id: barContainer
+            Layout.fillWidth: true
+            Layout.preferredHeight: 6
+            color: Qt.rgba(0, 0, 0, 0.05)
+            radius: 3
+            Layout.bottomMargin: 4
             
-            Title {
-                text: (typeof backend !== "undefined") ? (backend.playersOnline + "/" + backend.playersMax) : "--/--"
-                font.pixelSize: 11
+            Rectangle {
+                width: (typeof backend !== "undefined" && backend.playersMax > 0) ? 
+                       parent.width * (backend.playersOnline / backend.playersMax) : 0
+                height: parent.height
+                radius: 3
+                color: (typeof backend !== "undefined" && backend.online) ? "#28CD41" : "#FF3B30"
+                
+                Behavior on width { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
             }
         }
+    }
+    
+    // 鼠标悬浮显示详细信息（MOTD 等）
+    ToolTip {
+        visible: mouseArea.containsMouse
+        text: (typeof backend !== "undefined") ? backend.motd : ""
+        delay: 500
+    }
+    
+    MouseArea {
+        id: mouseArea
+        anchors.fill: parent
+        hoverEnabled: true
     }
 }
