@@ -106,7 +106,6 @@ class Plugin(CW2Plugin):
         self.api.widgets.register(
             widget_id="net.bloret.launcher.widget",
             name="Bloret 启动器",
-            description="一键打开 Bloret Launcher",
             qml_path=os.path.join(str(self.PATH), "qml", "Launcher.qml"),
             backend_obj=self.launcher_backend
         )
@@ -116,7 +115,6 @@ class Plugin(CW2Plugin):
         self.api.widgets.register(
             widget_id="net.bloret.server.status",
             name="Bloret 服务器状态",
-            description="实时显示 Bloret 服务器在线人数和状态",
             qml_path=os.path.join(str(self.PATH), "qml", "ServerStatus.qml"),
             backend_obj=self.status_backend
         )
