@@ -6,36 +6,38 @@ import RinUI
 
 Widget {
     id: root
-    // Widget 组件会自动处理背景、圆角和阴影
-    // 我们可以通过 text 属性设置标题（如果需要）
-    
     width: 80
     height: 80
 
+    // 确保内容完全居中，且不被遮挡
     Button {
         id: launchButton
         anchors.fill: parent
+        anchors.margins: 4
         flat: true
+        
+        background: null // 移除按钮背景，使用 Widget 背景
         
         contentItem: ColumnLayout {
             anchors.centerIn: parent
-            spacing: 4
+            spacing: 2
             
             Image {
                 source: "../icon.png"
-                Layout.preferredWidth: 48
-                Layout.preferredHeight: 48
+                Layout.preferredWidth: 44
+                Layout.preferredHeight: 44
                 Layout.alignment: Qt.AlignHCenter
                 smooth: true
                 
-                scale: launchButton.pressed ? 0.9 : 1.0
+                scale: launchButton.pressed ? 0.85 : 1.0
                 Behavior on scale { NumberAnimation { duration: 100 } }
             }
             
             Title {
                 text: "启动器"
-                font.pixelSize: 11
+                font.pixelSize: 10
                 Layout.alignment: Qt.AlignHCenter
+                color: "#1d1d1f"
             }
         }
 
